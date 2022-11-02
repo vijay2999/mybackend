@@ -20,6 +20,13 @@ const mid4= function ( req, res, next) {
     next()
 }
 
+
+
+// const ipAddress = req.socket.remoteAddress;
+//     res.send(ipAddress)
+//     console.log(req.route.path);
+//     app.use('/account', function(req, res, next) {
+//         console.log(req.path);
 module.exports.mid1= mid1
 module.exports.mid2= mid2
 module.exports.mid3= mid3
