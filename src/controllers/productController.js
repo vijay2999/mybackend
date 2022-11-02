@@ -1,7 +1,7 @@
 const { count } = require("console")
-const BookModel = require("../models/bookModel")
+const BookModel = require("../models/orderModel")
 
-const createBook= async function (req, res) {
+const createProduct= async function (req, res) {
     let data= req.body
 
     let savedData= await BookModel.create(data)
