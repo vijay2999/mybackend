@@ -1,5 +1,8 @@
 const jwt = require("jsonwebtoken");
+const { default: mongoose, isValidObjectId } = require("mongoose");
+const { findByIdAndUpdate, deleteOne } = require("../models/userModel");
 const userModel = require("../models/userModel");
+//const objectId=mongoose.Types.ObjectId
 
 /*
   Read all the comments multiple times to understand why we are doing what we are doing in login api and getUserData api
@@ -8,43 +11,105 @@ const createUser = async function (req,res) {
     let data = req.body;
   let savedData = await userModel.create(data);
   
-  let token = jwt.sign(
-    {
-        firstName:data.firstName,
-        emailId:data.emailId,
-        password:data.password ,
-    },"#bmw@111" );
-
-  res.send({ status: true, token: token });
+  res.send({ status: true, msg: savedData });
 }
 
-const authe = async function(req,res){
+const loginUser = async function(req,res){
 
-    let mail=req.body.email_id
+    let mail=req.body.emailId
     let pass=req.body.password
 
-    let userdata = await userModel.findOne({emailId:mail,password:pass})
+    let userdata = await userModel.findById({emailId:mail,password:pass})
     if(!userdata){
         res.send("you are not authorised person")
+
+        console.log(userdata.firstName)
     }
-    token=req.heders.tokan
-    res.send({status:true,msg:token})
+    let tokan = jwt.sign(
+        {
+            firstName:userdata.firstName,
+            emailId:userdata.emailId,
+        },"#bmw@111" );
+        
+    res.send({status:true,msg:tokan})
 }
 
 const userinfo = async function(req,res){
-    givenid=userId
-    tokan = req.heders.token
+     let userId=req.params.userId
+   let tokan = req.headers["x-auth-token"]
     if(!tokan){
         res.send("token not present")
     }
-    let decodedToken = jwt.verify(token, "#bmw@111");
+    let decodedToken = jwt.verify(tokan, "#bmw@111");
    if (!decodedToken)
     return res.send({ status: false, msg: "token is invalid" });
-    
-    userinfo = await userModel.find({givenid :_id})
-    res.send({status:true,msg:userinfo})
 
+   if(!isValidObjectId(userId)){
+return res.send({mes:"user id is not valid object id"})
+   }
+   
+  let star = await userModel.findById(userId)
+   
+    res.send({status:true,msg:star})
 }
+
+const putdata= async function(req,res){
+
+    let userId=req.params.userId
+
+//     let tokan = req.headers["x-auth-token"]
+//     if(!tokan){
+//         res.send("token not present")
+//     }
+//     let decodedToken = jwt.verify(tokan, "#bmw@111");
+//    if (!decodedToken)
+//     return res.send({ status: false, msg: "token is invalid" });
+
+//    if(!isValidObjectId(userId)){
+// return res.send({mes:"user id is not valid object id"})
+//    }
+    
+    const update = await userModel.findByIdAndUpdate({_id:userId},{firstName:"sourabh"})
+        res.send({status:"done", msg:update})
+}
+
+const deletedata = async function(req,res){
+
+    userId=req.params.userId
+//     let tokan = req.headers["x-auth-token"]
+//     if(!tokan){
+//         res.send("token not present")
+//     }
+//     let decodedToken = jwt.verify(tokan, "#bmw@111");
+//    if (!decodedToken)
+//     return res.send({ status: false, msg: "token is invalid" });
+
+//    if(!isValidObjectId(userId)){
+// return res.send({mes:"user id is not valid object id"})
+//    }
+    
+    
+    const abc = await userModel.findByIdAndUpdate({_id:userId},{ $set:{isDeleted:true}})
+        res.send({status:"done", msg:abc})
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const deleteUser=async (req,res)=>{
+//     const user3=req.params.userId
+//     const deletdata=await userModel.findByIdAndUpdate({userId:user3},{$set:{isdeleted:true}},{new:true})
+//     return res.send({msg:"Details Deleted"})
+//}
 
 
 
@@ -140,6 +205,7 @@ const userinfo = async function(req,res){
 // };
 
  module.exports.createUser = createUser;
- module.exports.authe = authe;
+ module.exports.loginUser = loginUser;
  module.exports.userinfo = userinfo;
-// module.exports.loginUser = loginUser;
+module.exports.putdata = putdata;
+module.exports.deletedata = deletedata;
